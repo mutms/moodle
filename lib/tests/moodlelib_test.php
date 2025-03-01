@@ -2452,6 +2452,7 @@ EOF;
             'path'         => $obj->path,
             'depth'        => $obj->depth,
             'locked'       => $obj->locked,
+            'tenantid'     => null,
         );
         $this->assertEquals(convert_to_array($obj), $ar);
     }

@@ -37,6 +37,10 @@ final class sessionlib_test extends \advanced_testcase {
         global $PAGE, $USER, $SESSION, $SITE, $CFG;
         $this->resetAfterTest();
 
+        if (mutenancy_is_active()) {
+            \tool_mutenancy\local\tenancy::deactivate();
+        }
+
         // NOTE: this function contains some static caches, let's reset first.
         cron_setup_user('reset');
         $this->assertDebuggingCalledCount(1);
