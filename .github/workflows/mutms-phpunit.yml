@@ -1,0 +1,121 @@
+name: muTMS PHPUnit
+
+on:
+  workflow_dispatch:
+    inputs:
+      phpunit_extra_options:
+        description: Additional options to apply to PHPUnit
+        required: false
+        default: ''
+      mutenancy_auto_activate:
+        type: boolean
+        description: Should multi-tenancy be activated during init?
+        required: True
+        default: False
+
+jobs:
+  PHPUnit:
+    runs-on: ${{ matrix.os }}
+    services:
+      exttests:
+        image: moodlehq/moodle-exttests
+        ports:
+          - 8080:80
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            php: 8.1
+            extensions:
+            db: mariadb
+            dbversion: 10.6
+          - os: ubuntu-22.04
+            php: 8.2
+            extensions:
+            db: mariadb
+            dbversion: 11.4
+          - os: ubuntu-22.04
+            php: 8.3
+            extensions:
+            db: mysqli
+            dbversion: 8.4
+          - os: ubuntu-22.04
+            php: 8.1
+            db: pgsql
+            dbversion: 13
+          - os: ubuntu-22.04
+            php: 8.3
+            db: pgsql
+            dbversion: 17
+
+    steps:
+      - name: Setting up MariaDB
+        if: ${{ matrix.db == 'mariadb' }}
+        uses: getong/mariadb-action@v1
+        with:
+          collation server: utf8mb4_bin
+          mariadb version: ${{ matrix.dbversion }}
+          mysql database: test
+          mysql user: test
+          mysql password: test
+
+      - name: Setting up MySQL
+        if: ${{ matrix.db == 'mysqli' }}
+        uses: moodlehq/mysql-action@v1
+        with:
+          collation server: utf8mb4_bin
+          mysql version: 8.0
+          mysql database: test
+          mysql user: test
+          mysql password: test
+          use tmpfs: true
+          tmpfs size: '1024M'
+          extra conf: --skip-log-bin
+
+      - name: Setting up PostgreSQL
+        if: ${{ matrix.db == 'pgsql' }}
+        uses: m4nu56/postgresql-action@v1
+        with:
+          postgresql version: ${{ matrix.dbversion }}
+          postgresql db: test
+          postgresql user: test
+          postgresql password: test
+
+      - name: Configuring git vars
+        uses: rlespinasse/github-slug-action@v4
+
+      - name: Setting up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ matrix.extensions }}
+          ini-values: max_input_vars=5000
+          coverage: none
+
+      - name: Checking out code from ${{ env.GITHUB_REF_SLUG }}
+        uses: actions/checkout@v4
+
+      - name: Setting up PHPUnit
+        env:
+          dbtype: ${{ matrix.db }}
+        run: |
+          echo "pathtophp=$(which php)" >> $GITHUB_ENV # Inject installed pathtophp to env. The template config needs it.
+          cp .github/workflows/mutms-phpunit-config.php config.php
+          if ${{ inputs.mutenancy_auto_activate }}; then
+          echo "define('TEST_MUTENANCY_INIT_AUTOENABLE', true);" >> config.php
+          fi
+          echo "require_once(__DIR__ . '/lib/setup.php');"  >> config.php
+          mkdir ../moodledata
+          sudo locale-gen en_AU.UTF-8
+          php admin/tool/phpunit/cli/init.php --no-composer-self-update
+
+      - name: Running PHPUnit tests
+        env:
+          dbtype: ${{ matrix.db }}
+          phpunit_options: ${{ secrets.phpunit_options }}
+        run: vendor/bin/phpunit $phpunit_options ${{ inputs.phpunit_extra_options }}
