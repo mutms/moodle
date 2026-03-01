@@ -51,7 +51,7 @@ See individual plugin wikis for detailed configuration instructions.
 
 ## Compatibility
 
-Moodle 4.5.10
+Moodle 5.0.6
 
 ## Plugins
 
