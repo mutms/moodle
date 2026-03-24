@@ -14,22 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-declare(strict_types=1);
+/**
+ * Provides a mock testable_tool_installaddon_installer_without_site_info class.
+ *
+ * @package     tool_installaddon
+ * @subpackage  fixtures
+ * @category    test
+ * @copyright   2026 Safat Shahin <safat.shahin@moodle.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-namespace tool_moodlenet\task;
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/testable_installer.php');
 
 /**
- * Ad-hoc task to perform post install tasks.
- * We use this to set the active activity chooser footer plugin to tool_moodlenet.
- * We couldn't do this directly in install.php, because there is an admin_apply_default_settings() call after all plugins are
- * installed and that would reset whatever value we had set earlier to 'hidden'.
+ * Testable subclass with site-info sharing disabled.
  *
- * @package   tool_moodlenet
- * @copyright 2022 Shamim Rezaie <shamim@moodle.com>
+ * @copyright 2026 Safat Shahin <safat.shahin@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class post_install extends \core\task\adhoc_task {
-    public function execute() {
-        set_config('activitychooseractivefooter', 'tool_moodlenet');
+class testable_tool_installaddon_installer_without_site_info extends testable_tool_installaddon_installer {
+    /**
+     * Disable site info sharing.
+     *
+     * @return bool
+     */
+    protected function should_send_site_info() {
+        return false;
     }
 }

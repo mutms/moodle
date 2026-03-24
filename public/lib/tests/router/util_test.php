@@ -18,8 +18,9 @@ namespace core\router;
 
 use core\router\middleware\moodle_route_attribute_middleware;
 use core\tests\router\route_testcase;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
-use Slim\Middleware\RoutingMiddleware;
+use core\url;
 
 /**
  * Tests for the route utility class.
@@ -30,6 +31,53 @@ use Slim\Middleware\RoutingMiddleware;
  * @covers     \core\router\util
  */
 final class util_test extends route_testcase {
+    /**
+     * Ensure that redirecting works as expected.
+     *
+     * @dataProvider redirect_provider
+     * @param string|url $url The URL to redirect to, as a string or a \core\url instance.
+     * @param string|null $expectedurl The expected URL in the Location header of the response.
+     */
+    public function test_redirect(
+        string|url $url,
+        ?string $expectedurl = null,
+    ): void {
+        $expectedurl = $expectedurl ?? $url;
+        $response = new Response(200, ['Content-Type' => 'application/json']);
+        $redirecturl = util::redirect($response, $url);
+        $this->assertInstanceOf(Response::class, $redirecturl);
+        $this->assertStringEndsWith($expectedurl, $redirecturl->getHeaderLine('Location'));
+    }
+
+    /**
+     * Data provider for test_redirect.
+     *
+     * @return \Generator
+     */
+    public static function redirect_provider(): \Generator {
+        yield 'String URL without parameters' => [
+            'url' => '/path',
+        ];
+        yield 'String URL with one parameter' => [
+            'url' => '/path?param1=value1',
+        ];
+        yield 'String URL with more than one parameter' => [
+            'url' => '/path?param1=value1&param2=value2',
+        ];
+        yield 'Object URL without parameters' => [
+            'url' => new url('/path'),
+            'expectedurl' => '/path',
+        ];
+        yield 'Object URL with one parameter' => [
+            'url' => new url('/path', ['param1' => 'value1']),
+            'expectedurl' => '/path?param1=value1',
+        ];
+        yield 'Object URL with more than one parameters' => [
+            'url' => new url('/path', ['param1' => 'value1', 'param2' => 'value2']),
+            'expectedurl' => '/path?param1=value1&param2=value2',
+        ];
+    }
+
     /**
      * Ensure that no error is thrown when getting a route instance for a callable.
      */

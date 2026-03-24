@@ -438,6 +438,30 @@ final class manager_test extends \advanced_testcase {
     }
 
     /**
+     * Tests that /login/confirm.php is excluded from MFA redirection.
+     *
+     * When a user follows an email self-registration confirmation link, MFA must
+     * not intercept the request before auth_email::user_confirm() has had a chance
+     * to restore the wantsurl from the auth_email_wantsurl user preference.
+     *
+     * @covers ::should_require_mfa
+     * @covers ::get_no_redirect_urls
+     */
+    public function test_confirm_url_no_redirect(): void {
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $confirmurl = new \moodle_url('/login/confirm.php');
+        $this->assertEquals(
+            \tool_mfa\manager::NO_REDIRECT,
+            \tool_mfa\manager::should_require_mfa($confirmurl, false),
+            '/login/confirm.php must not trigger an MFA redirect so that auth_email can ' .
+            'restore wantsurl from the auth_email_wantsurl user preference first.'
+        );
+    }
+
+    /**
      * Tests circular redirect auth
      *
      * @covers ::should_require_mfa
