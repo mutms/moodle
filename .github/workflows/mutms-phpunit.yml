@@ -38,25 +38,25 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            php: 8.2
+            php: 8.3
             db: mariadb
             dbversion: 10.11
           - os: ubuntu-24.04
-            php: 8.3
+            php: 8.4
             db: mariadb
-            dbversion: 11.4
+            dbversion: 11.8
           - os: ubuntu-24.04
             php: 8.3
             db: mysqli
             dbversion: 8.4
           - os: ubuntu-24.04
-            php: 8.2
+            php: 8.3
             db: pgsql
             dbversion: 15
           - os: ubuntu-24.04
             php: 8.4
             db: pgsql
-            dbversion: 17
+            dbversion: 18
 
     steps:
       - name: Run MariaDB Server
