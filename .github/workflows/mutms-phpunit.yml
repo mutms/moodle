@@ -52,7 +52,7 @@ jobs:
           - os: ubuntu-24.04
             php: 8.3
             db: pgsql
-            dbversion: 15
+            dbversion: 16
           - os: ubuntu-24.04
             php: 8.4
             db: pgsql
