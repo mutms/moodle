@@ -31,7 +31,10 @@
         }
     },
     "extra": {
-        "haspublicdir": true
+        "haspublicdir": true,
+        "branch-alias": {
+            "dev-patch/mutenancy/MOODLE_501_STABLE": "5.1.x-dev"
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
