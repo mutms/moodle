@@ -81,6 +81,9 @@ class data_controller extends \core_customfield\data_controller {
         if (!$this->get('id')) {
             $mform->setDefault($elementname, $this->get_default_value());
         }
+        if ($field->get_configdata_property('required')) {
+            $mform->addRule($elementname, null, 'required', null, 'client');
+        }
     }
 
     /**

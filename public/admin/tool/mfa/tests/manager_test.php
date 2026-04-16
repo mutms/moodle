@@ -20,6 +20,7 @@ namespace tool_mfa;
  * Tests for MFA manager class.
  *
  * @package     tool_mfa
+ * @covers      \tool_mfa\manager
  * @author      Peter Burnett <peterburnett@catalyst-au.net>
  * @copyright   Catalyst IT
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,9 +31,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests getting the factor total weight
-     *
-     * @covers ::get_total_weight
-     * @covers ::setup_user_factor
      */
     public function test_get_total_weight(): void {
         $this->resetAfterTest(true);
@@ -76,8 +74,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests getting the factor status
-     *
-     * @covers ::get_status
      */
     public function test_get_status(): void {
         $this->resetAfterTest(true);
@@ -117,8 +113,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests checking if passed enough factors
-     *
-     * @covers ::passed_enough_factors
      */
     public function test_passed_enough_factors(): void {
         $this->resetAfterTest(true);
@@ -152,6 +146,30 @@ final class manager_test extends \advanced_testcase {
     }
 
     /**
+     * Test reading no redirect URLs configuration
+     */
+    public function test_get_no_redirect_urls(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Ensure all EOL markers are covered.
+        $config = "/user/profile.php\r" .
+            "/course/index.php\n" .
+            "/admin/settings.php\r\n" .
+            "/mod/bar/view.php ";
+
+        set_config('redir_exclusions', $config, 'tool_mfa');
+
+        // Cast URLs to string for simpler comparison.
+        $noredirecturls = array_map(fn(\moodle_url $url) => (string) $url, manager::get_no_redirect_urls());
+
+        $this->assertContains((string) (new \moodle_url('/user/profile.php')), $noredirecturls);
+        $this->assertContains((string) (new \moodle_url('/course/index.php')), $noredirecturls);
+        $this->assertContains((string) (new \moodle_url('/admin/settings.php')), $noredirecturls);
+        $this->assertContains((string) (new \moodle_url('/mod/bar/view.php')), $noredirecturls);
+    }
+
+    /**
      * The data provider for whether urls should be redirected or not
      *
      * @return  array
@@ -178,7 +196,6 @@ final class manager_test extends \advanced_testcase {
     /**
      * Tests whether it should require mfa
      *
-     * @covers ::should_require_mfa
      * @param string $urlstring
      * @param string $webroot
      * @param bool $status
@@ -197,8 +214,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests whether it should require the mfa checks
-     *
-     * @covers ::should_require_mfa
      */
     public function test_should_require_mfa_checks(): void {
         // Setup test and user.
@@ -285,8 +300,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests should require the mfa redirection loop
-     *
-     * @covers ::should_require_mfa
      */
     public function test_should_require_mfa_redirection_loop(): void {
         // Setup test and user.
@@ -341,9 +354,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests checking for possible setup factor
-     *
-     * @covers ::possible_factor_setup
-     * @covers ::setup_user_factor
      */
     public function test_possible_factor_setup(): void {
         // Setup test and user.
@@ -377,8 +387,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests checking if a factor is ready
-     *
-     * @covers ::is_ready
      */
     public function test_is_ready(): void {
         // Setup test and user.
@@ -419,9 +427,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests core hooks
-     *
-     * @covers ::mfa_config_hook_test
-     * @covers ::mfa_login_hook_test
      */
     public function test_core_hooks(): void {
         // Setup test and user.
@@ -463,8 +468,6 @@ final class manager_test extends \advanced_testcase {
 
     /**
      * Tests circular redirect auth
-     *
-     * @covers ::should_require_mfa
      */
     public function test_circular_redirect_auth(): void {
         // Setup test and user.
