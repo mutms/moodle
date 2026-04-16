@@ -598,6 +598,10 @@ class manager {
         $urls = [
             new \moodle_url('/login/logout.php'),
             new \moodle_url('/admin/tool/mfa/guide.php'),
+            // Allow email self-registration confirmation to complete so that
+            // auth_email can restore wantsurl from the auth_email_wantsurl user
+            // preference before MFA intercepts on the next request.
+            new \moodle_url('/login/confirm.php'),
         ];
         foreach ($factors as $factor) {
             $urls = array_merge($urls, $factor->get_no_redirect_urls());
