@@ -2658,6 +2658,9 @@ function require_login($courseorid = null, $autologinguest = true, $cm = null, $
 
     if ($cm && !$cm->uservisible) {
         if ($cm->is_visible_on_course_page()) {
+            if ($preventredirect) {
+                throw new require_login_exception('Activity is restricted');
+            }
             $url = \core\router\util::get_path_for_callable(
                 [\core_course\route\controller\restricted_module::class, 'restricted_module_page'],
                 ['cm' => $cm->id],
@@ -5538,6 +5541,7 @@ function get_mailer($action='get') {
                 $mailer->Body             = "";
                 $mailer->AltBody          = "";
                 $mailer->ConfirmReadingTo = "";
+                $mailer->MessageID        = "";
 
                 $mailer->clearAllRecipients();
                 $mailer->clearReplyTos();
