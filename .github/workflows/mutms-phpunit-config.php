@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Template configuraton file for GitHub Actions CI/CD using Composer.
+ * Template configuraton file for github actions CI/CD.
  *
  * @package    core
  * @copyright  2020 onwards Eloy Lafuente (stronk7) {@link https://stronk7.com}
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// This cannot be used out from a GitHub Actions workflow, so just exit.
+// This cannot be used out from a github actions workflow, so just exit.
 getenv('GITHUB_WORKFLOW') || die; // phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState
 
 unset($CFG);
@@ -40,12 +40,12 @@ $CFG->dboptions = ['dbcollation' => 'utf8mb4_bin'];
 
 $host = 'localhost';
 $CFG->wwwroot   = "http://{$host}";
-$CFG->dataroot  = __DIR__ . '/data/moodledata';
+$CFG->dataroot  = realpath(dirname(__DIR__)) . '/moodledata';
 $CFG->admin     = 'admin';
 $CFG->directorypermissions = 0777;
 
 // Debug options - possible to be controlled by flag in future.
-$CFG->debug = (E_ALL); // DEBUG_DEVELOPER.
+$CFG->debug = (E_ALL | 2048); // DEBUG_DEVELOPER.
 $CFG->debugdisplay = 1;
 $CFG->debugstringids = 1; // Add strings=1 to url to get string ids.
 $CFG->perfdebug = 15;
@@ -55,7 +55,7 @@ $CFG->passwordpolicy = 0;
 $CFG->cronclionly = 0;
 $CFG->pathtophp = getenv('pathtophp');
 
-$CFG->phpunit_dataroot  = __DIR__ . '/data/phpunitdata';
+$CFG->phpunit_dataroot  = realpath(dirname(__DIR__)) . '/phpunitdata';
 $CFG->phpunit_prefix = 't_';
 
 $CFG->routerconfigured = true;
@@ -65,3 +65,9 @@ define('TEST_EXTERNAL_FILES_HTTPS_URL', 'http://localhost:8080');
 
 define('TEST_SESSION_REDIS_HOST', 'localhost');
 define('TEST_CACHESTORE_REDIS_TESTSERVERS', 'localhost');
+
+// TODO: add others (solr, mongodb, memcached, ldap...).
+
+// Too much for now: define('PHPUNIT_LONGTEST', true); // Only leaves a few tests out and they are run later by CI.
+
+
