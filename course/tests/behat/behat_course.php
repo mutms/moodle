@@ -2157,6 +2157,9 @@ class behat_course extends behat_base {
      * @Given /^I open the activity chooser$/
      */
     public function i_open_the_activity_chooser() {
+        $this->execute('behat_general::i_hover',
+            array('//button[@data-action="open-chooser"]', 'xpath_element'));
+
         $this->execute('behat_general::i_click_on',
             array('//button[@data-action="open-chooser"]', 'xpath_element'));
 
